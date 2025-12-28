@@ -1,0 +1,40 @@
+{
+  "name": "@kalmantic/peakinfer-mcp",
+  "version": "1.0.0",
+  "description": "PeakInfer MCP Server for Claude Desktop and Claude Code",
+  "type": "module",
+  "main": "dist/index.js",
+  "bin": {
+    "peakinfer-mcp": "dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsx src/index.ts",
+    "start": "node dist/index.js",
+    "typecheck": "tsc --noEmit"
+  },
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "peakinfer",
+    "llm",
+    "inference",
+    "claude"
+  ],
+  "author": "Kalmantic AI Labs",
+  "license": "MIT",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "tsx": "^4.7.0",
+    "typescript": "^5.3.0"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "files": [
+    "dist"
+  ]
+}
