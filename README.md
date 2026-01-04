@@ -20,7 +20,20 @@ Your code says `streaming: true`. Runtime shows 0% actual streams. That's driftâ
 
 ## Installation
 
-### Claude Desktop
+### Via npx (Recommended)
+
+```bash
+npx @kalmantic/peakinfer-mcp
+```
+
+### Via npm (Global)
+
+```bash
+npm install -g @kalmantic/peakinfer-mcp
+peakinfer-mcp
+```
+
+### Claude Desktop Configuration
 
 Add to `~/.config/claude/claude_desktop_config.json` (macOS) or `%APPDATA%\claude\claude_desktop_config.json` (Windows):
 
@@ -28,8 +41,8 @@ Add to `~/.config/claude/claude_desktop_config.json` (macOS) or `%APPDATA%\claud
 {
   "mcpServers": {
     "peakinfer": {
-      "command": "node",
-      "args": ["/path/to/peakinfer-mcp/dist/index.js"],
+      "command": "npx",
+      "args": ["@kalmantic/peakinfer-mcp"],
       "env": {
         "HELICONE_API_KEY": "your-key-here",
         "LANGSMITH_API_KEY": "your-key-here"
@@ -42,6 +55,7 @@ Add to `~/.config/claude/claude_desktop_config.json` (macOS) or `%APPDATA%\claud
 ### Build from Source
 
 ```bash
+git clone https://github.com/Kalmantic/peakinfer-mcp.git
 cd peakinfer-mcp
 npm install
 npm run build
