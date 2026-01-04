@@ -151,7 +151,7 @@ export async function fetchLangSmithTraces(
       );
     }
 
-    const data: LangSmithResponse = await response.json();
+    const data = await response.json() as LangSmithResponse;
 
     const events = (data.runs || [])
       .map(normalizeLangSmithRun)

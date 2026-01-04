@@ -22,7 +22,11 @@
     "claude"
   ],
   "author": "Kalmantic AI Labs",
-  "license": "MIT",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Kalmantic/peakinfer-mcp"
+  },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.0.0"
   },

@@ -131,7 +131,7 @@ async function getInferenceMapSchema() {
 
 async function getBenchmarksSummary() {
   try {
-    const { listBenchmarks, getBenchmarkVersion } = await import('../../../src/benchmarks/index.js');
+    const { listBenchmarks, getBenchmarkVersion } = await import('../benchmarks/index.js');
 
     const benchmarks = listBenchmarks();
     const version = getBenchmarkVersion();
@@ -140,7 +140,7 @@ async function getBenchmarksSummary() {
       version: version.version,
       lastUpdated: version.lastUpdated,
       totalModels: benchmarks.length,
-      models: benchmarks.map(b => ({
+      models: benchmarks.map((b: { model: string; provider: string; framework: string; hardware: string; metrics: { p95_latency_ms: number; throughput_tps: number } }) => ({
         model: b.model,
         provider: b.provider,
         framework: b.framework,
