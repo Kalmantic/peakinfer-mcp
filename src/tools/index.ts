@@ -3,7 +3,7 @@
  *
  * Available tools:
  * - get_helicone_events: Fetch runtime events from Helicone
- * - get_langsmith_traces: Fetch traces from LangSmith
+ * - get_langfuse_traces: Fetch traces from Langfuse
  * - get_inferencemax_benchmark: Get benchmark data for a model
  * - compare_to_baseline: Compare current analysis to historical baseline
  * - list_templates: List available optimization templates
@@ -41,14 +41,14 @@ const tools: Tool[] = [
     },
   },
   {
-    name: 'get_langsmith_traces',
-    description: 'Fetch LLM traces from LangSmith for runtime analysis',
+    name: 'get_langfuse_traces',
+    description: 'Fetch LLM traces from Langfuse for runtime analysis',
     inputSchema: {
       type: 'object',
       properties: {
         api_key: {
           type: 'string',
-          description: 'LangSmith API key (or set LANGSMITH_API_KEY env var)',
+          description: 'Langfuse API key as "publicKey:secretKey" (or set LANGFUSE_PUBLIC_KEY and LANGFUSE_SECRET_KEY env vars)',
         },
         days: {
           type: 'number',
@@ -253,8 +253,8 @@ export async function handleToolCall(
     switch (name) {
       case 'get_helicone_events':
         return await handleGetHeliconeEvents(args);
-      case 'get_langsmith_traces':
-        return await handleGetLangSmithTraces(args);
+      case 'get_langfuse_traces':
+        return await handleGetLangfuseTraces(args);
       case 'get_inferencemax_benchmark':
         return await handleGetBenchmark(args);
       case 'compare_to_baseline':
@@ -269,7 +269,7 @@ export async function handleToolCall(
         return formatError({
           code: ErrorCodes.UNKNOWN_TOOL,
           message: `Unknown tool: ${name}`,
-          suggestion: `Available tools: get_helicone_events, get_langsmith_traces, get_inferencemax_benchmark, compare_to_baseline, list_templates, get_template, save_analysis`,
+          suggestion: `Available tools: get_helicone_events, get_langfuse_traces, get_inferencemax_benchmark, compare_to_baseline, list_templates, get_template, save_analysis`,
         });
     }
   } catch (error) {
@@ -318,13 +318,13 @@ async function handleGetHeliconeEvents(args: Record<string, unknown>) {
   };
 }
 
-async function handleGetLangSmithTraces(args: Record<string, unknown>) {
-  const apiKey = (args.api_key as string) || process.env.LANGSMITH_API_KEY;
+async function handleGetLangfuseTraces(args: Record<string, unknown>) {
+  const apiKey = (args.api_key as string) || process.env.LANGFUSE_PUBLIC_KEY;
   if (!apiKey) {
     return {
       content: [{
         type: 'text',
-        text: 'Error: LangSmith API key required. Provide via api_key argument or LANGSMITH_API_KEY env var.',
+        text: 'Error: Langfuse API key required. Provide via api_key argument as "publicKey:secretKey" or set LANGFUSE_PUBLIC_KEY and LANGFUSE_SECRET_KEY env vars.',
       }],
     };
   }
@@ -332,12 +332,12 @@ async function handleGetLangSmithTraces(args: Record<string, unknown>) {
   const days = (args.days as number) || 7;
   const limit = (args.limit as number) || 1000;
 
-  const { fetchLangSmithTraces } = await import('../connectors/langsmith.js');
+  const { fetchLangfuseTraces } = await import('../connectors/langfuse.js');
 
   const startDate = new Date();
   startDate.setDate(startDate.getDate() - days);
 
-  const result = await fetchLangSmithTraces({
+  const result = await fetchLangfuseTraces({
     apiKey,
     startDate: startDate.toISOString(),
     limit,

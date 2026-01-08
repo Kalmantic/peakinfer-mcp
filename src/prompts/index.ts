@@ -50,7 +50,7 @@ const prompts: Prompt[] = [
     arguments: [
       {
         name: 'runtime_source',
-        description: 'Runtime data source: helicone, langsmith',
+        description: 'Runtime data source: helicone, langfuse',
         required: true,
       },
       {

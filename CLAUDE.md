@@ -18,7 +18,7 @@ This is the **peakinfer-mcp** (Model Context Protocol Server) repository.
 | Tool | Description |
 |------|-------------|
 | `get_helicone_events` | Fetch runtime events from Helicone |
-| `get_langsmith_traces` | Fetch traces from LangSmith |
+| `get_langfuse_traces` | Fetch traces from Langfuse |
 | `get_inferencemax_benchmark` | Get benchmark data for a model |
 | `compare_to_baseline` | Compare analysis to historical baseline |
 | `list_templates` | List available optimization templates |
@@ -51,7 +51,8 @@ Add to `~/.config/claude/claude_desktop_config.json` (macOS):
       "args": ["/path/to/peakinfer-mcp/dist/index.js"],
       "env": {
         "HELICONE_API_KEY": "your-key-here",
-        "LANGSMITH_API_KEY": "your-key-here"
+        "LANGFUSE_PUBLIC_KEY": "your-public-key-here",
+        "LANGFUSE_SECRET_KEY": "your-secret-key-here"
       }
     }
   }
@@ -76,7 +77,7 @@ npm run build
 | `src/tools/index.ts` | Tool implementations |
 | `src/resources/index.ts` | Resource handlers |
 | `src/prompts/index.ts` | Prompt templates |
-| `src/connectors/` | Helicone, LangSmith connectors |
+| `src/connectors/` | Helicone, Langfuse connectors |
 | `src/benchmarks/` | InferenceMAX data |
 | `data/inferencemax.json` | Benchmark data (15 models) |
 
@@ -116,7 +117,7 @@ Error codes returned by tools:
 
 ### Work Completed
 
-- Bundled connectors (Helicone, LangSmith) locally
+- Bundled connectors (Helicone, Langfuse) locally
 - Bundled benchmarks (InferenceMAX) locally
 - Added error boundaries with specific error codes
 - Fixed import paths (no CLI dependencies)
@@ -135,7 +136,7 @@ Error codes returned by tools:
 ### Important Context
 
 1. **Self-contained** - No dependencies on CLI repo
-2. **Bundled connectors** - Helicone, LangSmith in src/connectors/
+2. **Bundled connectors** - Helicone, Langfuse in src/connectors/
 3. **Bundled benchmarks** - InferenceMAX in data/
 4. **Error boundaries** - Specific error codes for debugging
 

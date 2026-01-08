@@ -13,7 +13,7 @@ Your code says `streaming: true`. Runtime shows 0% actual streams. That's driftâ
 ## Features
 
 - **Drift Detection**: Find mismatches between code declarations and runtime behavior
-- **Runtime Connectors**: Fetch events from Helicone and LangSmith
+- **Runtime Connectors**: Fetch events from Helicone and Langfuse
 - **Benchmark Comparison**: Compare your metrics to InferenceMAX benchmarks (15+ models)
 - **Template Library**: Access 43 optimization templates
 - **Analysis History**: Track and compare performance over time
@@ -45,12 +45,35 @@ Add to `~/.config/claude/claude_desktop_config.json` (macOS) or `%APPDATA%\claud
       "args": ["@kalmantic/peakinfer-mcp"],
       "env": {
         "HELICONE_API_KEY": "your-key-here",
-        "LANGSMITH_API_KEY": "your-key-here"
+        "LANGFUSE_PUBLIC_KEY": "your-public-key-here",
+        "LANGFUSE_SECRET_KEY": "your-secret-key-here"
       }
     }
   }
 }
 ```
+
+### Claude Code Configuration
+
+Add to `~/.config/claude/mcp.json` (macOS/Linux) or `%APPDATA%\Claude\mcp.json` (Windows):
+
+```json
+{
+  "mcpServers": {
+    "peakinfer": {
+      "command": "npx",
+      "args": ["@kalmantic/peakinfer-mcp"],
+      "env": {
+        "HELICONE_API_KEY": "your-key-here",
+        "LANGFUSE_PUBLIC_KEY": "your-public-key-here",
+        "LANGFUSE_SECRET_KEY": "your-secret-key-here"
+      }
+    }
+  }
+}
+```
+
+**Note:** If the `~/.config/claude/` directory doesn't exist, create it first. After saving the configuration, restart Claude Code to apply the changes.
 
 ### Build from Source
 
@@ -68,7 +91,7 @@ npm run build
 | Tool | Description |
 |------|-------------|
 | `get_helicone_events` | Fetch LLM events from Helicone |
-| `get_langsmith_traces` | Fetch traces from LangSmith |
+| `get_langfuse_traces` | Fetch traces from Langfuse |
 
 ### Benchmarks
 
@@ -95,7 +118,9 @@ npm run build
 | Variable | Description |
 |----------|-------------|
 | `HELICONE_API_KEY` | API key for Helicone integration |
-| `LANGSMITH_API_KEY` | API key for LangSmith integration |
+| `LANGFUSE_PUBLIC_KEY` | Public key for Langfuse integration |
+| `LANGFUSE_SECRET_KEY` | Secret key for Langfuse integration |
+| `LANGFUSE_HOST` | (Optional) Custom Langfuse host for self-hosted instances |
 
 ## Example Usage
 
@@ -142,11 +167,18 @@ PeakInfer analyzes every inference point across 4 dimensions:
 
 ## Troubleshooting
 
-### Server not appearing in Claude Desktop
+### Server not appearing in Claude Desktop/Code
 
-1. Check the path to `dist/index.js` is absolute
-2. Verify `npm run build` completed successfully
+**For Claude Desktop:**
+1. Check the path to `dist/index.js` is absolute (if using local build)
+2. Verify `npm run build` completed successfully (if using local build)
 3. Restart Claude Desktop after config changes
+
+**For Claude Code:**
+1. Verify the `mcp.json` file exists at `~/.config/claude/mcp.json` (macOS/Linux) or `%APPDATA%\Claude\mcp.json` (Windows)
+2. Check the JSON syntax is valid
+3. Ensure `npx` is available in your PATH
+4. Restart Claude Code after config changes
 
 ### API key errors
 
