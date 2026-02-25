@@ -378,7 +378,7 @@ async function handleAnalyze(args) {
         '    "mcpServers": {',
         '      "peakinfer": {',
         '        "command": "npx",',
-        '        "args": ["-y", "peakinfer-mcp"],',
+        '        "args": ["-y", "@peakinfer/mcp"],',
         '        "env": {',
         '          "PEAKINFER_API_TOKEN": "pk_live_YOUR_TOKEN_HERE"',
         '        }',

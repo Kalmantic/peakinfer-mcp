@@ -405,7 +405,7 @@ async function handleAnalyze(args: Record<string, unknown>) {
     '    "mcpServers": {',
     '      "peakinfer": {',
     '        "command": "npx",',
-    '        "args": ["-y", "peakinfer-mcp"],',
+    '        "args": ["-y", "@peakinfer/mcp"],',
     '        "env": {',
     '          "PEAKINFER_API_TOKEN": "pk_live_YOUR_TOKEN_HERE"',
     '        }',

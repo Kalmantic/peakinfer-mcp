@@ -6,14 +6,14 @@
  * Provides tools for LLM inference analysis and optimization.
  *
  * Usage:
- *   npx @kalmantic/peakinfer-mcp
+ *   npx @peakinfer/mcp
  *
  * Claude Desktop config (~/.config/claude/claude_desktop_config.json):
  * {
  *   "mcpServers": {
  *     "peakinfer": {
  *       "command": "npx",
- *       "args": ["@kalmantic/peakinfer-mcp"]
+ *       "args": ["@peakinfer/mcp"]
  *     }
  *   }
  * }

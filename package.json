@@ -1,6 +1,6 @@
 {
-  "name": "@kalmantic/peakinfer-mcp",
-  "version": "1.0.0",
+  "name": "@peakinfer/mcp",
+  "version": "1.0.1",
   "description": "PeakInfer MCP Server for Claude Desktop and Claude Code",
   "type": "module",
   "main": "dist/index.js",
