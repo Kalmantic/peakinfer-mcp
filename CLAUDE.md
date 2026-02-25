@@ -14,9 +14,10 @@ This is the **peakinfer-mcp** (Model Context Protocol Server) repository.
 
 ### What This Server Provides
 
-**Tools (7):**
+**Tools (8):**
 | Tool | Description |
 |------|-------------|
+| `analyze` | **Primary** - Analyze code via PeakInfer API/CLI with fallback chain |
 | `get_helicone_events` | Fetch runtime events from Helicone |
 | `get_langsmith_traces` | Fetch traces from LangSmith |
 | `get_inferencemax_benchmark` | Get benchmark data for a model |
@@ -47,9 +48,10 @@ Add to `~/.config/claude/claude_desktop_config.json` (macOS):
 {
   "mcpServers": {
     "peakinfer": {
-      "command": "node",
-      "args": ["/path/to/peakinfer-mcp/dist/index.js"],
+      "command": "npx",
+      "args": ["-y", "peakinfer-mcp"],
       "env": {
+        "PEAKINFER_API_TOKEN": "pk_live_YOUR_TOKEN_HERE",
         "HELICONE_API_KEY": "your-key-here",
         "LANGSMITH_API_KEY": "your-key-here"
       }
@@ -57,6 +59,15 @@ Add to `~/.config/claude/claude_desktop_config.json` (macOS):
   }
 }
 ```
+
+**Environment Variables:**
+| Variable | Purpose | Required |
+|----------|---------|----------|
+| `PEAKINFER_API_TOKEN` | PeakInfer API token (get from peakinfer.com/dashboard) | For `analyze` tool (paid) |
+| `ANTHROPIC_API_KEY` | BYOK mode (free, no credits) | For `analyze` tool (free) |
+| `PEAKINFER_API_URL` | Custom API URL | Testing only |
+| `HELICONE_API_KEY` | Helicone runtime data | For drift detection |
+| `LANGSMITH_API_KEY` | LangSmith runtime data | For drift detection |
 
 ### Build
 
@@ -76,7 +87,11 @@ npm run build
 | `src/tools/index.ts` | Tool implementations |
 | `src/resources/index.ts` | Resource handlers |
 | `src/prompts/index.ts` | Prompt templates |
-| `src/connectors/` | Helicone, LangSmith connectors |
+| `src/connectors/peakinfer-api.ts` | PeakInfer API connector (peakinfer.com) |
+| `src/connectors/peakinfer-cli.ts` | PeakInfer CLI fallback |
+| `src/connectors/file-reader.ts` | Local file reader for API submission |
+| `src/connectors/helicone.ts` | Helicone runtime connector |
+| `src/connectors/langsmith.ts` | LangSmith runtime connector |
 | `src/benchmarks/` | InferenceMAX data |
 | `data/inferencemax.json` | Benchmark data (15 models) |
 
@@ -98,11 +113,11 @@ Error codes returned by tools:
 
 ---
 
-## Session Memory (Last Updated: December 28, 2025)
+## Session Memory (Last Updated: February 23, 2026)
 
 ### Current State
 
-**v1.9.5 Status:** ✅ Complete - Separated from CLI repo
+**v2.0.0 Status:** `analyze` tool added - Full pipeline: Skills → MCP → PeakInfer API
 
 ### Repository Change
 
@@ -120,6 +135,10 @@ Error codes returned by tools:
 - Bundled benchmarks (InferenceMAX) locally
 - Added error boundaries with specific error codes
 - Fixed import paths (no CLI dependencies)
+- **v2.0.0**: Added `analyze` tool with PeakInfer API connector
+- **v2.0.0**: Added CLI fallback connector
+- **v2.0.0**: Added file-reader utility for local code reading
+- **v2.0.0**: Fallback chain: CLI (free, local) → API (cloud) → error with setup instructions
 
 ### Cross-Repo Context
 
@@ -138,6 +157,8 @@ Error codes returned by tools:
 2. **Bundled connectors** - Helicone, LangSmith in src/connectors/
 3. **Bundled benchmarks** - InferenceMAX in data/
 4. **Error boundaries** - Specific error codes for debugging
+5. **Analyze tool** - Tries local CLI first (free), falls back to peakinfer.com/api/analyze
+6. **Auth modes** - CLI (no auth needed), Bearer token (paid), or BYOK via ANTHROPIC_API_KEY (free)
 
 ### Reference Documents
 

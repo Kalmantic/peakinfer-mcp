@@ -1,0 +1,1 @@
+{"version":3,"file":"file-reader.d.ts","sourceRoot":"","sources":["../../src/connectors/file-reader.ts"],"names":[],"mappings":"AAAA;;;;;GAKG;AA+BH,MAAM,WAAW,QAAQ;IACvB,IAAI,EAAE,MAAM,CAAC;IACb,OAAO,EAAE,MAAM,CAAC;CACjB;AAoDD,wBAAsB,aAAa,CAAC,UAAU,EAAE,MAAM,GAAG,OAAO,CAAC,QAAQ,EAAE,CAAC,CAyB3E;AAED,eAAO,MAAM,kBAAkB;;;;CAI9B,CAAC"}

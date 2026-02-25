@@ -2,6 +2,7 @@
  * MCP Tools Registration
  *
  * Available tools:
+ * - analyze: Analyze code for LLM inference issues via PeakInfer engine
  * - get_helicone_events: Fetch runtime events from Helicone
  * - get_langsmith_traces: Fetch traces from LangSmith
  * - get_inferencemax_benchmark: Get benchmark data for a model
@@ -16,6 +17,42 @@ import type { Tool } from '@modelcontextprotocol/sdk/types.js';
 
 // Tool definitions
 const tools: Tool[] = [
+  {
+    name: 'analyze',
+    description: 'Analyze code for LLM inference issues using PeakInfer engine. Returns detailed report on latency, cost, throughput, and reliability with actionable fixes.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        path: {
+          type: 'string',
+          description: 'Path to the code directory or file to analyze',
+        },
+        files: {
+          type: 'array',
+          description: 'Pre-read files array [{path, content}]. If provided, skips reading from disk.',
+          items: {
+            type: 'object',
+            properties: {
+              path: { type: 'string' },
+              content: { type: 'string' },
+            },
+            required: ['path', 'content'],
+          },
+        },
+        fixes: {
+          type: 'boolean',
+          description: 'Include code fix suggestions (default: true)',
+          default: true,
+        },
+        benchmark: {
+          type: 'boolean',
+          description: 'Include benchmark comparisons (default: true)',
+          default: true,
+        },
+      },
+      required: [],
+    },
+  },
   {
     name: 'get_helicone_events',
     description: 'Fetch LLM runtime events from Helicone for drift detection analysis',
@@ -251,6 +288,8 @@ export async function handleToolCall(
 ): Promise<{ content: Array<{ type: string; text: string }> }> {
   try {
     switch (name) {
+      case 'analyze':
+        return await handleAnalyze(args);
       case 'get_helicone_events':
         return await handleGetHeliconeEvents(args);
       case 'get_langsmith_traces':
@@ -269,7 +308,7 @@ export async function handleToolCall(
         return formatError({
           code: ErrorCodes.UNKNOWN_TOOL,
           message: `Unknown tool: ${name}`,
-          suggestion: `Available tools: get_helicone_events, get_langsmith_traces, get_inferencemax_benchmark, compare_to_baseline, list_templates, get_template, save_analysis`,
+          suggestion: `Available tools: analyze, get_helicone_events, get_langsmith_traces, get_inferencemax_benchmark, compare_to_baseline, list_templates, get_template, save_analysis`,
         });
     }
   } catch (error) {
@@ -278,6 +317,115 @@ export async function handleToolCall(
 }
 
 // Tool handlers
+
+async function handleAnalyze(args: Record<string, unknown>) {
+  const path = args.path as string | undefined;
+  const preReadFiles = args.files as Array<{ path: string; content: string }> | undefined;
+  const fixes = (args.fixes as boolean) ?? true;
+  const benchmark = (args.benchmark as boolean) ?? true;
+
+  // Step 1: Get files to analyze
+  let files: Array<{ path: string; content: string }>;
+
+  if (preReadFiles && preReadFiles.length > 0) {
+    files = preReadFiles;
+  } else if (path) {
+    try {
+      const { readCodeFiles } = await import('../connectors/file-reader.js');
+      files = await readCodeFiles(path);
+    } catch (error) {
+      return formatError({
+        code: ErrorCodes.FILE_ERROR,
+        message: error instanceof Error ? error.message : 'Failed to read files',
+        suggestion: 'Check that the path exists and contains code files (.py, .ts, .js, etc.)',
+      });
+    }
+  } else {
+    return formatError({
+      code: ErrorCodes.INVALID_INPUT,
+      message: 'Either path or files must be provided',
+      suggestion: 'Provide a path to a code directory or file, or pass pre-read files.',
+    });
+  }
+
+  // Step 2: Try CLI first (free, local, fast)
+  if (path) {
+    try {
+      const { analyzeViaCLI } = await import('../connectors/peakinfer-cli.js');
+      const result = await analyzeViaCLI({ path, options: { fixes, benchmark } });
+      if (result) {
+        return {
+          content: [{
+            type: 'text',
+            text: JSON.stringify(result, null, 2),
+          }],
+        };
+      }
+    } catch (error) {
+      console.error(`PeakInfer CLI error (falling back to API): ${error instanceof Error ? error.message : 'Unknown'}`);
+    }
+  }
+
+  // Step 3: Try API fallback (if auth is available)
+  const apiToken = process.env.PEAKINFER_API_TOKEN;
+  const anthropicKey = process.env.ANTHROPIC_API_KEY;
+
+  if (apiToken || anthropicKey) {
+    try {
+      const { analyzeViaAPI } = await import('../connectors/peakinfer-api.js');
+      const result = await analyzeViaAPI({
+        files,
+        token: apiToken,
+        anthropicKey,
+        options: { fixes, benchmark },
+      });
+      return {
+        content: [{
+          type: 'text',
+          text: JSON.stringify(result, null, 2),
+        }],
+      };
+    } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : 'Unknown API error';
+      console.error(`PeakInfer API error: ${errorMsg}`);
+    }
+  }
+
+  // Step 4: No analysis method available - return setup instructions
+  const setupLines = [
+    'PeakInfer CLI not found and no API token configured.',
+    '',
+    'Option 1: Install PeakInfer CLI (recommended, free)',
+    '  npm install -g peakinfer',
+    '',
+    'Option 2: Set up PeakInfer API token (cloud analysis)',
+    '  Get a token at: https://peakinfer.com/dashboard',
+    '  Add to your MCP config:',
+    '  {',
+    '    "mcpServers": {',
+    '      "peakinfer": {',
+    '        "command": "npx",',
+    '        "args": ["-y", "peakinfer-mcp"],',
+    '        "env": {',
+    '          "PEAKINFER_API_TOKEN": "pk_live_YOUR_TOKEN_HERE"',
+    '        }',
+    '      }',
+    '    }',
+    '  }',
+    '',
+    'Option 3: Use BYOK mode (free, no credits needed)',
+    '  Add ANTHROPIC_API_KEY to your MCP config env.',
+    '',
+    `Files found: ${files.length} code files ready for analysis.`,
+  ];
+
+  return {
+    content: [{
+      type: 'text',
+      text: setupLines.join('\n'),
+    }],
+  };
+}
 
 async function handleGetHeliconeEvents(args: Record<string, unknown>) {
   const apiKey = (args.api_key as string) || process.env.HELICONE_API_KEY;
